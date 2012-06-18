@@ -1,0 +1,8 @@
+This program is an example for programmatically creating and deleting 
+a vlan interface in Mac OS X and FreeBSD. 
+You can also use ifconfig and ipconfig commandds to create a vlan interface 
+and assign an IP address to it.
+Creating a vlan interface:   ifconfig vlan100 create
+Binding the created interface to a parent interface and assign vlan id: 
+ifconfig vlan100 vlan 100 vlandev en0
+Assigning an IP address using DHCP: ipconfig set vlan100
