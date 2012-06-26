@@ -28,107 +28,107 @@
 void usage();
 
 struct vlanreq {
-	char vlr_parent[IFNAMSIZ];
-	u_short vlr_tag;
+    char vlr_parent[IFNAMSIZ];
+    u_short vlr_tag;
 };
 
 void usage(char *bin){
 
-	printf("%s: Creates a vlan interface on MAC OS X and freebsd\n", bin);
-	printf("Usage:\n");
-	printf("i	parent interface\n");
-	printf("r	remove interface\n");
-	printf("v	vlan-tag\n");
+    printf("%s: Creates a vlan interface on MAC OS X and freebsd\n", bin);
+    printf("Usage:\n");
+    printf("i   parent interface\n");
+    printf("r   remove interface\n");
+    printf("v   vlan-tag\n");
     printf("To create a vlan interface:\n");
-	printf("Example usage: %s -i en0 -v 10\n",bin);
-	printf("Once the vlan interface is created, you can assign the ip address using the command," 
+    printf("Example usage: %s -i en0 -v 10\n",bin);
+    printf("Once the vlan interface is created, you can assign the ip address using the command," 
            "ipconfig set vlan100 dhcp \n");
     printf("To remove the vlan interface:\n");
-	printf("Example usage: %s -r vlan100 \n",bin);
+    printf("Example usage: %s -r vlan100 \n",bin);
 }
 
 void removeInterface(char *deviceName){
 
-	struct ifreq ifr;
-	int sock = socket(AF_LOCAL,SOCK_DGRAM,0);
-	if(sock < 0){
-		err(1,"Error: opening socket");
-	}
-	strncpy(ifr.ifr_name,deviceName,IFNAMSIZ);
-	
-	if((ioctl(sock,SIOCIFDESTROY,&ifr) < 0)){
-		printf("Error: Deleting interface %s\n",deviceName);
-		err(1,"SIOCIFDESTROY");
-	}
-	printf("Removed interface %s\n",deviceName);
+    struct ifreq ifr;
+    int sock = socket(AF_LOCAL,SOCK_DGRAM,0);
+    if(sock < 0){
+        err(1,"Error: opening socket");
+    }
+    strncpy(ifr.ifr_name,deviceName,IFNAMSIZ);
+    
+    if((ioctl(sock,SIOCIFDESTROY,&ifr) < 0)){
+        printf("Error: Deleting interface %s\n",deviceName);
+        err(1,"SIOCIFDESTROY");
+    }
+    printf("Removed interface %s\n",deviceName);
 }
-	
+    
 
 int main(int argc, char **argv){
 
-	if(argc < 3){
-		usage(argv[0]);
-		exit(1);
-	}
+    if(argc < 3){
+        usage(argv[0]);
+        exit(1);
+    }
 
-	int c = 0;
-	char device[IFNAMSIZ] = { '\0' };
-	int vlanTag = 0;
-	char vlanString[10] = {'\0' };
+    int c = 0;
+    char device[IFNAMSIZ] = { '\0' };
+    int vlanTag = 0;
+    char vlanString[10] = {'\0' };
 
-	while((c = getopt(argc,argv,"i:v:r:h")) != -1){
+    while((c = getopt(argc,argv,"i:v:r:h")) != -1){
 
-		switch(c){
+        switch(c){
 
-			case 'i':
-				strncpy(device,optarg,sizeof(device) - 1);
-				break;
-			case 'r':
-				strncpy(device,optarg,sizeof(device) - 1);
-				removeInterface(device);
-				exit(1);
-			case 'v':
-				strncpy(vlanString,optarg,sizeof(vlanString) - 1 );
-				vlanTag = atoi(optarg);
-				break;
-			case 'h':
-				usage(argv[0]);
-				exit(1);
-			default:
-				usage(argv[0]);
-				exit(1);
-		}
-	}	
-	
-	char vlanDevice[IFNAMSIZ] = {'\0' };
-	strcpy(vlanDevice,"vlan");
-	strcat(vlanDevice,vlanString);
-	
-	struct ifreq ifr;
-	struct vlanreq vreq;
-	int sock;
-	if((sock = socket(AF_LOCAL, SOCK_DGRAM, 0)) < 0){
-		err(1,"Error: opening socket");
-		return -1;
-	}
-	bzero((char *)&vreq,sizeof(vreq));
-	strncpy(ifr.ifr_name,vlanDevice,sizeof(ifr.ifr_name)); 
-	vreq.vlr_tag = vlanTag;
-	strncpy(vreq.vlr_parent,device,sizeof(vreq.vlr_parent));
-	ifr.ifr_data = (caddr_t)&vreq;
-	 	
-	int ret = ioctl(sock,SIOCIFCREATE,(caddr_t)&ifr);
-	if(ret < 0){
-		err(1,"SIOCIFCREATE");
-		return -1;
-	}
-	
-	ret = ioctl(sock,SIOCSETVLAN,(caddr_t)&ifr);
-	if(ret < 0){
-		err(1,"SIOCSETVLAN");
-		return -1;
-	}
-	printf("Created vlan interface %s\n", vlanDevice);	
-	return 0;
+        case 'i':
+            strncpy(device,optarg,sizeof(device) - 1);
+            break;
+        case 'r':
+            strncpy(device,optarg,sizeof(device) - 1);
+            removeInterface(device);
+            exit(1);
+        case 'v':
+            strncpy(vlanString,optarg,sizeof(vlanString) - 1 );
+            vlanTag = atoi(optarg);
+            break;
+        case 'h':
+            usage(argv[0]);
+            exit(1);
+        default:
+            usage(argv[0]);
+            exit(1);
+        }
+    }   
+    
+    char vlanDevice[IFNAMSIZ] = {'\0' };
+    strcpy(vlanDevice,"vlan");
+    strcat(vlanDevice,vlanString);
+    
+    struct ifreq ifr;
+    struct vlanreq vreq;
+    int sock;
+    if((sock = socket(AF_LOCAL, SOCK_DGRAM, 0)) < 0){
+        err(1,"Error: opening socket");
+        return -1;
+    }
+    bzero((char *)&vreq,sizeof(vreq));
+    strncpy(ifr.ifr_name,vlanDevice,sizeof(ifr.ifr_name)); 
+    vreq.vlr_tag = vlanTag;
+    strncpy(vreq.vlr_parent,device,sizeof(vreq.vlr_parent));
+    ifr.ifr_data = (caddr_t)&vreq;
+        
+    int ret = ioctl(sock,SIOCIFCREATE,(caddr_t)&ifr);
+    if(ret < 0){
+        err(1,"SIOCIFCREATE");
+        return -1;
+    }
+    
+    ret = ioctl(sock,SIOCSETVLAN,(caddr_t)&ifr);
+    if(ret < 0){
+        err(1,"SIOCSETVLAN");
+        return -1;
+    }
+    printf("Created vlan interface %s\n", vlanDevice);  
+    return 0;
 }
 
